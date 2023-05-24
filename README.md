@@ -39,7 +39,7 @@ From summary, we obtain the proportion of variance explained (PVE) and cumulativ
 
 Use plot function to plot the PVE and cumulative PVE.The elements of pve and cumsum(pve) can be obtained directly from summary(pc.out)$importance
 
-```{r}
+```ruby
 par(mfrow=c(1,2))
 plot(summary(pc.out)$importance[2,], type="o", main="PVE", col=2, xlab=" ", ylab = " ")
 plot(summary(pc.out)$importance[3,],type="o",main="Cumulative PVE", col=3, xlab=" ", ylab = " ")
@@ -52,7 +52,7 @@ Looking at the scree plot, we can notice that the first PC explains a substantia
 
 Since the first two principle components have explained pretty large variability of the data (roughly 95%), we plot the first two PCs. On the whole, true.labels will be used to assign a color to each of 60 variables projections based on the group to which it corresponds. It can be seen clearly that variables corresponding to a single group tend to have similar values on the first principle component score vectors, therefore, they lie near each other in low-dimensional space and creates 3 distinct groups with different colors. 
 
-```{r}
+```ruby
 plot(pc.out$x[,1:2], col=true.labels, xlab= "PC1", ylab="PC2", main="Principle Component score vectors", pch=19)
 ```
 ![image](https://github.com/kimdta/Unsupervised-learning-by-R/assets/133651115/976470b4-2b43-4acd-87c6-b57f2173e527)
@@ -145,7 +145,7 @@ Here, we can find a comparison between Kmeans clustering generated (K=3, K=2 and
 
 d) Perform K-means on the first 2th PCs
 
-```{r}
+```ruby
 km.out=kmeans(pc.out$x[,1:2], 3, nstart=20)
 km.out
 table(km.out$cluster, true.labels) #all obs are perfectly clustered
@@ -160,8 +160,7 @@ between_SS / total_SS =  99.5 %
 We can observed that from the R output there is a ratio B/T of 99.5%. Kmeans clustering on the first two principle component score vectors can give better results than performing clustering on the full data. In this case, we might view the principle component step as one of denoising (removing noise) the data
 Table() function shows that all the observations are perfectly clustered once again, 20 observations for each cluster.
 
-
-```{r, echo=FALSE}
+```ruby
 par(mfrow=c(1,2))  
 plot(pc.out$x[,1:2], col=(true.labels), main="Original data", xlab=expression(X["1"]), ylab=expression(X["2"]), pch=16, cex=1)
 plot(pc.out$x[,1:2], col=(km.out$cluster), main="K-Means on 2th PCs", xlab=expression(X["1"]), ylab=expression(X["2"]), pch=16)
