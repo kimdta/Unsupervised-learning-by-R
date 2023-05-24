@@ -35,32 +35,6 @@ Firstly, we label the 3 different groups into different colors and three classes
 pc.out= prcomp(x, scale= TRUE)
 summary(pc.out)    #give summary of importance indices of output
 ```
-Importance of components:
-                          PC1     PC2     PC3    PC4     PC5    PC6     PC7     PC8     PC9
-Standard deviation     6.8733 0.42459 0.40680 0.4000 0.38817 0.3806 0.37320 0.34822 0.34331
-Proportion of Variance 0.9448 0.00361 0.00331 0.0032 0.00301 0.0029 0.00279 0.00243 0.00236
-Cumulative Proportion  0.9448 0.94846 0.95177 0.9550 0.95798 0.9609 0.96366 0.96609 0.96845
-                         PC10    PC11    PC12    PC13    PC14    PC15    PC16    PC17    PC18
-Standard deviation     0.3392 0.33034 0.32270 0.30490 0.29546 0.29238 0.28944 0.27981 0.26028
-Proportion of Variance 0.0023 0.00218 0.00208 0.00186 0.00175 0.00171 0.00168 0.00157 0.00135
-Cumulative Proportion  0.9708 0.97293 0.97501 0.97687 0.97862 0.98033 0.98200 0.98357 0.98492
-                         PC19    PC20    PC21    PC22   PC23    PC24    PC25    PC26    PC27
-Standard deviation     0.2550 0.24582 0.23849 0.23058 0.2238 0.21706 0.20568 0.19865 0.19151
-Proportion of Variance 0.0013 0.00121 0.00114 0.00106 0.0010 0.00094 0.00085 0.00079 0.00073
-Cumulative Proportion  0.9862 0.98743 0.98857 0.98963 0.9906 0.99158 0.99242 0.99321 0.99395
-                          PC28    PC29    PC30    PC31    PC32    PC33    PC34    PC35    PC36
-Standard deviation     0.18413 0.17950 0.17104 0.16171 0.15178 0.14287 0.13760 0.13425 0.12593
-Proportion of Variance 0.00068 0.00064 0.00059 0.00052 0.00046 0.00041 0.00038 0.00036 0.00032
-Cumulative Proportion  0.99462 0.99527 0.99585 0.99638 0.99684 0.99725 0.99762 0.99798 0.99830
-                          PC37    PC38    PC39    PC40    PC41    PC42    PC43    PC44    PC45
-Standard deviation     0.11923 0.11016 0.10360 0.09317 0.08853 0.08286 0.07535 0.06839 0.06411
-Proportion of Variance 0.00028 0.00024 0.00021 0.00017 0.00016 0.00014 0.00011 0.00009 0.00008
-Cumulative Proportion  0.99859 0.99883 0.99904 0.99922 0.99937 0.99951 0.99962 0.99972 0.99980
-                          PC46    PC47    PC48    PC49    PC50
-Standard deviation     0.05676 0.04984 0.04429 0.04014 0.02650
-Proportion of Variance 0.00006 0.00005 0.00004 0.00003 0.00001
-Cumulative Proportion  0.99986 0.99991 0.99995 0.99999 1.00000
-
 From summary, we obtain the proportion of variance explained (PVE) and cumulative PVE of all 50 PCs. Cumulative PVE of the first three PCs already explain over 95% of variability of the data; exclusively PC1 could explain 94,48% variability of the data and the other principle components just represent a small amount of variance. Thus, variation of the data was mostly captured by the first principle component.
 
 Use plot function to plot the PVE and cumulative PVE.The elements of pve and cumsum(pve) can be obtained directly from summary(pc.out)$importance
