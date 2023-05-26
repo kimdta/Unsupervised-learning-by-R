@@ -95,7 +95,7 @@ table(km3.out$cluster, true.labels)  #obs are perfectly clustered
   2  0 20  0
   3  0  0 20
   
-``ruby
+```ruby
 par(mfrow=c(1,2))  
 plot(x, col=(true.labels), main="Original data", xlab=expression(X["1"]), ylab=expression(X["2"]), pch=20, cex=1)
 plot(x, col=(km3.out$cluster), main="K-Means with K=3", xlab=expression(X["1"]), ylab=expression(X["2"]), pch=20, cex=1)
