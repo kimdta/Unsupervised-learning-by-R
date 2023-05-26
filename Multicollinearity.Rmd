@@ -1,0 +1,100 @@
+
+**[a] Fit a multiple regression model to predict Sales using Price, Urban, and US**
+
+```{r}
+library(ISLR)
+summary(Carseats)
+Data=data.frame(Carseats)
+attach(Carseats)
+```
+
+We load the data _Carseats_ contained information about car seat sales in 400 stores and 11 different variables modeling change in sale of child car seats. The response Sales is a quantitative variable and presents sales (in thousands) at each location. The predictor _Price_ is a quantitative variable and contains the price company charges for car seats at each site. _Urban_ is a categorical variable taking value 1 for Yes and 2 for No which indicates whether the store is in an urban or rural location. Similarly, _US_ is a categorical variable taking value 1 for Yes and 2 for No which indicates whether the store is in the US or not.
+
+```{r message=FALSE, warning=FALSE}
+lm1=lm(Sales~Price+Urban+US, data=Data) 
+summary(lm1)
+```
+
+From summary(), we check the model fit by looking at the R-squared statistic which is 23.93% proved to be quite a poor model of fit and even Adjusted R-squared doesn't provide a better result. We can say that just 23.93% of variability in the _Sales_ that is explained by predictors _Price_, _Urban_ and _US_.
+We also obtain F-statistic= 41.52 and its corresponding p-value <2.2e-16 which is quite small then we can reject the hypothesis indicating a clear evidence of relationship between _Sales_ and our regressors.
+
+```{r}
+library(car)
+vif(lm1)    #give variance inflation factors
+```
+
+The VIF scores are 1.0053, 1.0042 and 1.0053 for Price, Urban and US respectively which are roughly equal to 1. Therefore, there is also no evidence of collinearity between our regressors.
+
+**[b] Provide an interpretation of each coefficient in the model.**
+
+```{r}
+lm1$coefficients
+```
+The intercept $\beta_0$ is equal to $13.043$, which means that at minimum 13 thousands units of child car seats are sold at each location independent of the Price, store location in US or in urban area.
+
+For what concerns the variable _Price_, we can see that we obtained a negative coefficient, which means if the price of the car seat increases, the Sales decrease. This makes sense since the higher the price, the lower the quantity demanded. To be more specific, a coefficient of $-0.054459$ means that on average with respect to other variables constant, the price of a car seat increases by 1 unit, it will reduces the sales by 0.054459 units. For testing the significance of _Price_, we observe a large t-statistic $-10.389$ and a low p-values (less than 5%). Then, we can assure influence of Price is significant in explaining changes in Sales.
+
+The second coefficient of _UrbanYes_ is negative, meaning that the car seats sales in the urban area perform worse than rural area. More specifically, if the store is located in urban area, the sale will be decreased by $0.021916$ units compared with rural located stores. However, in this case, p-value is $0.936$ which is largely higher than 0.05 lead us to accept the null hypothesis of the significance of _UrbanYes_ coefficient. Therefore, we can say that there is no evidence for a relationship between sales and the urban location of the store.
+
+Lastly, the variable _USYes_ gives a positive coefficient of $1.200573$ meaning that on average, with respect to the other variables constant, the sales in US is 1.200573 units higher than those abroad.The coefficient is highly significant and shows the presence of a positive relationship between these two variables.
+
+**[c] Write out the model in equation form.**
+
+The model can be expressed analytically in equation form with 2 binary qualitative variables which are _Urban_ and _US_. 
+
+$Sales=\beta_0 + \beta_1 * Price +\beta_2 * UrbanYes +\beta_3 * USYes +\epsilon$
+
+By the result obtain from lm1() regression, _Sales_ units can be expressed as a linear regression of _Price_, _UrbanYes_, _USYes_ and their weight carrying their influences on our response variable Sales
+
+$Sales= 13.04 - 0.054* Price - 0.02 *UrbanYes + 1.2*USYes +\epsilon$
+
+**[d] For which of the predictors can you reject the null hypothesis H0 :βj =0?**
+
+When we test the significance of coefficients, we use test statistic with H0: $\beta_j$ =0 and H1: $\beta_j$ # 0. Given the data, we can compute T statistic (with $T= b_j/SE(b_j)$ and $b_j$ is the unbiased estimator of $\beta_j$). Under the null hypothesis, $\beta_j$ will take value around 0 with high value of T or small value of p-values. Therefore, we reject the H0 for coefficients with p-values larger than 5% and accept H0 for p-values larger than 5%.
+
+From the regression, we observe the t-statistic and p-values. In fact, _Price_ and _USYes_ coefficients give high absolute t-values and p-values are quite small (2e-16 and 4.8e-06 respectively < 5% for sure), then we can conclude that probability observing $\lvert{t-obs\rvert}$ less than its threshold is quite small. In another words, we reject the null hypothesis and conclude that $\beta_1$ and $\beta_3$ corresponding to _Price_ and _USYes_ coefficients significantly different from 0 and Price and USYes are useful to explain variation in Sales.
+
+However, we fail to reject the null hypothesis H0: $\beta_2$=0 since R provides small observed t-value $|t-obs|$=0.081 and a pretty high p-value (0.936 >> 0.05). Thus, we can confirm that _UrbanYes_ coefficient is insignificant and whether the store is located in urban or not doesn't really affect the change in Sales.
+
+**[e] On the basis of your response to the previous question, fit a smaller model that only uses the predictors for which there is evidence of association with the outcome**
+
+Since _Urban_ is an insignificant variable in explaining _Sales_, we decide to remove it from model trying to find a model fitting better our data with 2 significant predictors _Price_ and _US_
+
+```{r}
+lm2=lm(Sales~Price+US, Data) 
+summary(lm2)
+```
+
+**[f] How well do the models in (a) and (e) fit the data?**
+
+Parameters to consider the goodness of fit of the model doesn't provide a far better result compared with the previous model lm1(), however there is an improvement in F-statistic (62.43 higher than previous 41.25), p-value is <2.2e-16 also lead us to reject the null hypothesis of all coefficients equal to 0. Generally speaking, both of these models fit our data similarly. Model lm2() after removing insignificant predictors seems to provide a slightly better indicators of Adjust R-square 23.54 higher than 23.35 obtained in lm1(). Thus, we can assure that removing _Urban_ doesn't affect the goodness of fit of our data.
+
+**[g] Using the model from (e), obtain 95% confidence intervals for the coefficient(s).**
+
+```{r}
+confint(lm2, level=0.95)
+```
+
+The result of confint() calculated based on asymptotic normality. Above are lower and upper confidence limits for each variable coefficients. A 95% confidence interval associated with Price coefficient is (-0.065,-0.044) which are centered around -0.054 (what we obtained in regression of lm2). At 95%, confidence interval of USYes coefficient is (0.69,1.7) which are subtantially wider corresponds to what we obtain is 1.2 in the regression.
+
+**[h] Is there evidence of outliers or high leverage observations in the model from (e)?**
+
+```{r message=FALSE, warning=FALSE}
+par(mfrow=c(2,2))
+plot(lm2)
+abline(lm2, lwd=3)
+par(mfrow=c(1,1))
+```
+Outliers are observations for which the response obtained unusual given the predictors due to incorrect recording of observations during data collection. The presence of outliers could be a danger for fitting the data. And to detect outliers from model lm2, we analyse the plot of studentized residuals. The rule is: observations whose studentized residuals are greater than 3 in absolute value are highly possible outliners. In the left hand plot, all studentized residuals are falling inside the bound (-3,3) , then we can confirm that there is no evidence of potential outliners in our model lm2.
+
+```{r}
+par(mfrow=c(1,3))
+plot(predict(lm2), rstudent(lm2), xlab= "Fitted values", ylab="Studentized residuals")       #return studentized residuals
+plot(hatvalues(lm2), xlab = "Leverage", ylab ="hatvalues")   #return h-values in diagonal of H matrix 
+points(hatvalues(lm2)[which.max(hatvalues(lm2))], type="o", col=2, cex=1.2, pch=19)
+par(mfrow=c(1,1))
+hatvalues(lm2)[which.max(hatvalues(lm2))]    #give the element of largest hatvalues
+```  
+Observations with high leverage have an unusual value for predictors and usually have a sizable impact on the estimated regression line. To detect leverage, we employ the projection matrix of our response $\hat{y}$. Elements $h_i$ in diagonal matrix of H indicates the influence of response estimates in determining our prediction. As a reasonable rule of thumb, a value of $h_i$ higher than its average is proved to be a high leverage point.
+
+A right hand plot is a plot of the studentized residuals versus $h_i$ values for the data. We can observe that observation 43 stands out as having a very large leverage statistic. However, from the plot of "Residuals vs Leverage", we find out this highest leverage observation is associated with a low standardized residual, then this observation is not really dangerous to our model prediction.
