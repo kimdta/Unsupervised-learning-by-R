@@ -1,10 +1,3 @@
----
-title: "Assignment 1"
-output:
-  word_document: default
-  pdf_document: default
-  html_document: default
----
 
 ##### (a)	Generate a simulated data set with 20 observations in each of three classes ( 60 obs*50 variables)
 
