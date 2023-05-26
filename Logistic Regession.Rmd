@@ -1,0 +1,151 @@
+
+*Q*: Using the dataset HW.txt, apply the validation set approach and the CV-approach to assess the classification performance of the logistic regression (with only the two regressors) and of the LDA method.
+
+*A*:
+First of all we should read the data set as follows. We can see that there are 400 observations (individuals)  with 2 predictors, specifically height and Weight and the binary response Gender. We aim at predicting Gender given a Height and a Weight. Our response variable is expressed in binary with 1 is Male and 0 is Female.
+
+```{r}
+HW= read.csv("HW.txt")
+str(HW)
+HW$Gender=as.factor(HW$Gender)
+cor(HW$Height,HW$Weight)   #Height and Weight are highly correlated
+```
+
+Now, we use both Validation Set approach and Cross Validation approach to assess the classification performance of 2 statistical methods: LOGISTIC REGRESSION AND LDA METHOD 
+
+*LOGISTIC REGRESSION METHOD*
+***(a) Estimation of TEST ERROR RATE using VALIDATION SET APPROACH***
+
+We randomly divide the available set of observations in two parts,a training set and validation set using sample(), each contains half of the dataset, specifically 200 observations. Firstly, we proceed the ***MODEL ASSESSMENT*** by evaluating the performance of Logistic regression for a given level of complexity. We start to fit our data from a standard linear logistic regression, which models on the two dimensional classification data. Then, we estimate the test error rate through validation set error rate, which indicates the proportion of miss classification units.
+
+```{r}
+attach(HW)
+set.seed(1)
+Test_set=sample(nrow(HW), 200, replace=FALSE) 
+glm.fits= glm(Gender~ Height + Weight, data = HW, 
+              family = "binomial", subset = -Test_set) 
+summary(glm.fits)
+
+glm.probs= predict(glm.fits, HW[Test_set,], type= "response")
+glm.preds= ifelse(glm.probs>0.5, "M", "F")
+table(glm.preds,HW$Gender[Test_set])
+mean(glm.preds==HW$Gender[Test_set])                   #measure the accuracy of prediction
+glm.error=mean(glm.preds!=HW$Gender[Test_set]); glm.error  # validation set error rate 
+```
+
+From the function summary(), we can see some results indicating the performance of logistic regression. $Median is roughly around zero. On average, given this model, an increment of one unit of Height increases the logarithm of the odds (the logit) to have a Male gender by 0.13955, but the coefficient is not really significant given a p-value=0.0962. Regressor Weight seems to have more weight in determining the probability of having a Male with coefficient of 0.27289 and statistically significant given a pretty small p-value= 2.56e-10. 
+
+After fitting the model with our training set, we obtain Maximum Likelihood estimators of unknown parameters, which we used to capture the probability of having a Male. We measure an accuracy of the model by passing those parameters through a valuation set, setting a threshold 0.5, from which if $\hat{P}(Y=1)>0.5$, prediction (glm.preds) will give a Male, otherwise, a Female.
+
+The diagonal elements of the confusion matrix indicate correct predictions, while the off-diagonal shows incorrect predictions.  From table(), we observe a nice result with numbers of observation being miss-classified is 12. The accuracy ratio then equals to 0.94 and error rate is (6+6)/200= 0.06
+
+However,we have to point out a drawback: when we repeat that process of randomly dividing the dataset into two parts using sample() function. Each time, we obtain a different validation error. Then it's obvious that the validation estimate of test error rate can be highly variable depending on how we separate our data.
+
+Secondly, by validation set approach, we proceed ***MODEL SELECTION*** by fitting logistic regression model with a quadratic one to see how test error estimates varies in higher level of complexity. We can easily extend logistic regression to obtain a quadratic logistic regression model by using polynomial functions of the predictors.
+
+```{r}
+set.seed(2)
+Test_set=sample(nrow(HW), 200, replace=FALSE) 
+glm.fits=glm(Gender~ Height + I(Height^2)+ Weight + I(Weight^2), data = HW, 
+             family= binomial, subset= -Test_set ) 
+glm.probs= predict(glm.fits, HW[Test_set,], type= "response")
+glm.preds= ifelse(glm.probs>0.5, "M", "F")
+table(glm.preds,HW$Gender[Test_set])
+mean(glm.preds==HW$Gender[Test_set])                   
+glm.error=mean(glm.preds!=HW$Gender[Test_set]); glm.error
+```
+
+As we can see, the error rate obtain from quadratic logistic regression is 0.07 slightly higher than the linear logistic regression we obtain above. The complexity of our model also affects the quality of our classification. Moreover, each time we randomly split the training/validation set, we used to obtain different estimation of test error rate. To avoid that, Cross Validation Approach come into practice as a good resampling method provided a good method for estimating test error rate.
+
+***(b) Estimation of TEST ERROR RATE using CROSS VALIDATION (CV) APPROACH***
+
+Firstly, we proceed ***MODEL ASSESSMENT*** by computing CV test error rate for a fixed level of complexity. We try with linear logistic regression (1 degree of polynomial) then applying k-fold cross validation method with different numbers of nfolds (different trials of splits) to estimate the test error rate and to assess how well will perform the model.
+
+```{r}
+glm.CV= function(nfolds) {
+        n= nrow(HW)  
+        set.seed(2)  
+        s= split(sample(n),rep(1:nfolds,length=n))  
+        test.error.rate = NULL   
+        for(j in 1:nfolds){
+        set.seed(3)
+        glm.fits=glm(Gender~ Height + Weight, data = HW, 
+                     family= binomial, subset= -s[[j]])
+        glm.probs= predict(glm.fits, HW[s[[j]],c(3,4)], type= "response")
+        glm.preds= ifelse(glm.probs>0.5, "M", "F")
+        test.error.rate[j] = mean(glm.preds!=HW$Gender[s[[j]]]) #  proportion of miss                                                                                   classifications in the fold j
+} 
+  return(test.error.rate)  #proportion of miss classifications
+}
+cv.error1=mean(glm.CV(nfolds=100));cv.error1
+cv.error1=mean(glm.CV(nfolds=10));cv.error1
+```
+
+Above, there are expressions of Cross-Validation (CV) error rate of a logistic regression using "nfolds", each time a different fold of observations is treated as a validation set.
+
+As it is shown in the result above, the average test error rate of logistic regression shows different result for different number of nfolds assigned. Test error rate of 100 folds is 0.0825 which is slightly lower than error of 10 folds (0.0875). When we run the commands with different nfolds, we still observe variability in the CV estimates as a result of the variability in the way the observations are divided. However, this variability is typically much lower than the variability in the test error estimates resulted from the Validation Set approach.
+
+In general, mean of estimate of proportion of miss classification (Ave CV) decreases when we decrease the level of flexibility (number of splitting). For high degrees of flexibility, CV used to overestimate the test set MSE. Despite that, our goal is to determine how well the logistic regression is expected to perform on independent data. We are not really interested to find the location of the minimum point in the estimated test error curve.
+
+Secondly, we implement ***MODEL SELECTION*** to find out the best level of complexity (best degree of polynomial) given a specific number of folds based on the CV test error rate. In order to pick up the best level of complexity, we should perform different regression ranging from linear, quadratic, cubic and quartic ...(corresponding to 1-10 degree of complexity) in terms of estimation of test error rates. For the sake of parsimony, we use a fix 10 folds (K=10) cross validation to avoid over-fitting data.
+
+```{r warning=FALSE}
+library(boot)    #USING cv.glm()
+set.seed(4)
+cv.error2= NULL
+degree=1:10
+for( i in degree){
+  glm.fit=glm(Gender~ poly(Height, i) + poly(Weight, i), family = binomial, data= HW)
+  cv.error2[i]=cv.glm(HW, glm.fit, K=10)$delta[1]
+}
+cv.error2                 #prediction error, not miss classification error
+min(cv.error2)             #test error estimate from Cross Validation approach
+which.min(cv.error2)
+plot(degree,cv.error2,ylab = "Validation set error estimates",xlab = "degree of polynomial",type="b")
+```
+
+Since the logistic regression is not a classification algorithm, we can't compare this result with the test.error.rate obtained from glm.CV function above. Then, what we have to do is transforming the proportion of miss classification (test.error rate in previous model) into Mean square error.
+
+```{r, echo=TRUE}
+glm.CV= function(nfolds) {
+        n= nrow(HW)  
+        set.seed(2)  
+        s= split(sample(n),rep(1:nfolds,length=n))  
+        Test.error.rate = NULL   
+        for(j in 1:nfolds){
+        set.seed(3)
+        glm.fits=glm(Gender~ Height + Weight, data = HW, 
+                     family= binomial, subset= -s[[j]])
+        glm.probs= predict(glm.fits, HW[s[[j]],c(3,4)], type= "response")
+        glm.preds= ifelse(HW$Gender[s[[j]]]== "M", 1, 0)  #transform miss classification into MSE
+        Test.error.rate[j]= mean((glm.probs - glm.preds)^2)
+} 
+  return(Test.error.rate)  #Mean square error based on distance
+}
+cv.error1=mean(glm.CV(nfolds=10));cv.error1    #test error estimate from Validation set approach
+```
+
+As you can see, the result from glm.CV function is almost similar with that obtained from cv.glm() function (variance just 0.0017). We can say that the 10-FOLDS Cross Validation approach provide a pretty good approximation to the test error rate.
+
+Among different level of complexity, a quadratic logistic regression (2 degree of polynomial) seems to perform superior compared with other regression, which provided the lowest estimate of test error rate (MSE) of $0.06553259$ and proportion of miss classification of $0.06751032$. In fact, we observe at the beginning that the correlation coefficient between Height and Weight are quite high at 0.7. Thus, a quadratic logistic regression is outperforming over a linear one. 
+
+The plot of cv.error2 also shows that the test error increased as level of complexity of model increased. It reached a minimum when 2 or 3 polynomials are used. Therefore, we can say that cross validation provide a useful approach to estimate test error rate.
+
+```{r warning=FALSE, echo=TRUE}
+glm.CV= function(nfolds) {
+        n= nrow(HW)  
+        set.seed(2)  
+        s= split(sample(n),rep(1:nfolds,length=n))  
+        Test.error.rate = NULL   
+        for(j in 1:nfolds){
+        set.seed(3)
+        glm.fits=glm(Gender~ poly(Height,2) + poly(Weight,2), data = HW, 
+                     family= binomial, subset= -s[[j]])
+        glm.probs= predict(glm.fits, HW[s[[j]],c(3,4)], type= "response")
+        glm.preds= ifelse(HW$Gender[s[[j]]]== "M", 1, 0)  #transform miss classification into MSE
+        Test.error.rate[j]= mean((glm.probs - glm.preds)^2)
+} 
+  return(Test.error.rate)  #Mean square error based on distance
+}
+cv.error3=mean(glm.CV(nfolds=10));cv.error3    #test error estimate from Validation set approach
+```
